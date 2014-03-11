@@ -6,10 +6,17 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXFileReference section */
+		EBA3668418CDE914002C3685 /* mlab_base.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = mlab_base.py; sourceTree = "<group>"; };
+		EBA3668518CDECE3002C3685 /* testes_mlab.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = testes_mlab.py; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
 /* Begin PBXGroup section */
 		EBA3667918CDE8FE002C3685 = {
 			isa = PBXGroup;
 			children = (
+				EBA3668418CDE914002C3685 /* mlab_base.py */,
+				EBA3668518CDECE3002C3685 /* testes_mlab.py */,
 			);
 			sourceTree = "<group>";
 		};
