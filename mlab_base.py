@@ -10,6 +10,7 @@ import os
 import zipfile
 import tarfile
 import csv
+import subprocess
 
 '''
 
@@ -23,18 +24,6 @@ dictionarye = [
 "server IP address",
 "server hostname",
 "server kernel version",
-"client IP address",
-"client hostname",
-"client OS name",
-"client_browser name",
-"client_application name",
-"Summary data",
-" * Additional data",
-]
-
-minidic = [
-"Date/Time",
-"server IP address",
 "client IP address",
 "client hostname",
 "client OS name",
@@ -64,6 +53,7 @@ def reader(input):
     for x in file:
         x = x.split(":")
         header=x[0]
+        if header==" * Additional data": break
         results=""
         for i in range(1,len(x)):
             if i>1: results=results+":"
@@ -73,13 +63,16 @@ def reader(input):
         output[header]=results
 
     web100 = output["Summary data"].split(",")
-    i=2
-    for x in web100:
-        header="web100_"+str(i)
-        output[header]=x
-        i+=1
-    output.pop("Summary data")
-    return output
+    if len(web100)!=53:
+        return 0
+    else:
+        i=2
+        for x in web100:
+            header="web100_"+str(i)
+            output[header]=x
+            i+=1
+        output.pop("Summary data")
+        return output
 
 def texpand(input,extraction=0):
     ttotal=time.time()
@@ -110,8 +103,8 @@ def metalist(input):
         if jon[-1]=="meta": output.append(x)
     return output
 
-def createout(path,outname,input):
-    outfile=file(path+outname,"w")
+def createout(output,input):
+    outfile = open(output,"w")
     listed=[]
     i=0
     sortee=sorted(input)
@@ -130,32 +123,55 @@ def createout(path,outname,input):
     writer=csv.writer(outfile)
     writer.writerows(transposed)
 
+def downloader(data,destino,primeiro,ultimo):
+    tglobal=time.time()
+    gspath = 'gs://m-lab/ndt/' + data + '/'
+    tarlist = subprocess.check_output('gsutil ls ' + gspath, shell=True)
+    tarlist = tarlist.split('\n')
+    for index in range(primeiro,ultimo):
+        tdl=time.time()
+        chamada = 'gsutil cp ' + tarlist[index] + " " + destino
+        subprocess.call(chamada, shell=True)
+        tdl=time.time()-tdl
+        print "Downloaded file " + str(index) + " in " + str(tdl) + " seconds."
+    locallist=[]
+    for index in range(primeiro,ultimo):
+        fpath = tarlist[index]
+        fname = fpath.split("/")
+        fname = str(fname[-1])
+        locallist.append(destino + fname)
+    tglobal = time.time()-tglobal
+    "Total download time: " + str(tglobal) + " seconds."
+    return locallist
+
+def roda(data,destino,primeiro,ultimo):
+    primeiro-=1
+    lstar = downloader(data,destino,primeiro,ultimo)
+    
+    for index in range(primeiro,ultimo):
+        filelist = texpand(lstar[index],1)
+        mfilelist = metalist(filelist)
+
+        input=destino+mfilelist[0]
+        int=reader(input)
+        final={}
+        for x in int:
+            final[x]=[]
+
+        for x in mfilelist:
+            input=destino+x
+            int=reader(input)
+            if int==0:
+                continue
+            for y in int:
+                final[y].append(int[y])
+        
+        createout(lstar[index]+".csv",final)
+
+        for x in filelist:
+            x=destino+x
+            os.remove(x)
 
 
+roda('2014/02/01','/Users/pedro/CTI/ID/MLab/NDT/',1,3)
 
-basepath="/Users/pedro/CTI/ID/MLab/"
-tar=basepath+"20120105T000000Z-mlab1-ams01-ndt-0000.tgz"
-
-filelist=texpand(tar,1)
-mfilelist=metalist(filelist)
-
-input=basepath+mfilelist[0]
-int=reader(input)
-final={}
-for x in int:
-    final[x]=[]
-
-for x in mfilelist:
-    input=basepath+x
-    int=reader(input)
-    for y in int:
-        final[y].append(int[y])
-
-for x in filelist:
-    x=basepath+x
-    os.remove(x)
-#os.rmdir(basepath+"2012/01/05/")
-#os.rmdir(basepath+"2012/01/")
-#os.rmdir(basepath+"2012/")
-
-createout(basepath,"teste.csv",final)
