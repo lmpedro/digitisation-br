@@ -66,18 +66,18 @@ def reader(input):
     if len(web100)!=53:
         return 0
     else:
-        i=2
+        i=3
         for x in web100:
-            header="web100_"+str(i)
+            header="web100_%02i" %i
             output[header]=x
             i+=1
         output.pop("Summary data")
         return output
 
-def texpand(input,extraction=0):
+def texpand(input,extraction=1):
     ttotal=time.time()
     tfil=time.time()
-    print "Extracting filenames..."
+    print "\nExtracting filenames..."
     targuy=tarfile.open(input,"r")
     namelist=targuy.getnames()
     tfil=time.time()-tfil
@@ -104,6 +104,7 @@ def metalist(input):
     return output
 
 def createout(output,input):
+    print "\nCreating summary file..."
     outfile = open(output,"w")
     listed=[]
     i=0
@@ -120,58 +121,113 @@ def createout(output,input):
             for j in range(len(listed)):
                 row.append(listed[j][k])
             transposed.append(row)
-    writer=csv.writer(outfile)
-    writer.writerows(transposed)
+    for h in range(len(transposed)):
+        for i in range(len(transposed[h])):
+            if i>0: outfile.write("|")
+            outfile.write(transposed[h][i])
+        outfile.write('\n')
+    outfile.close()
 
-def downloader(data,destino,primeiro,ultimo):
+def downloader(data,destino,index):
     tglobal=time.time()
+    print "\nInitiating download process..."
+    
     gspath = 'gs://m-lab/ndt/' + data + '/'
     tarlist = subprocess.check_output('gsutil ls ' + gspath, shell=True)
     tarlist = tarlist.split('\n')
-    for index in range(primeiro,ultimo):
-        tdl=time.time()
-        chamada = 'gsutil cp ' + tarlist[index] + " " + destino
-        subprocess.call(chamada, shell=True)
-        tdl=time.time()-tdl
-        print "Downloaded file " + str(index) + " in " + str(tdl) + " seconds."
-    locallist=[]
-    for index in range(primeiro,ultimo):
-        fpath = tarlist[index]
-        fname = fpath.split("/")
-        fname = str(fname[-1])
-        locallist.append(destino + fname)
-    tglobal = time.time()-tglobal
-    "Total download time: " + str(tglobal) + " seconds."
-    return locallist
-
-def roda(data,destino,primeiro,ultimo):
-    primeiro-=1
-    lstar = downloader(data,destino,primeiro,ultimo)
+    print "There are a total of %i files for this date. Working on file %i (index %i)." %(len(tarlist)-1,index+1,index)
+    if index >= len(tarlist)-1 :
+        raise ValueError, "This is an invalid index file. Probably, all the files for this date have been processed. Terminating the programme."
     
-    for index in range(primeiro,ultimo):
-        filelist = texpand(lstar[index],1)
-        mfilelist = metalist(filelist)
+    chamada = 'gsutil cp ' + tarlist[index] + " " + destino
+    subprocess.call(chamada, shell=True)
+    
+    fpath = tarlist[index]
+    fname = fpath.split("/")
+    fname = str(fname[-1])
+    local = destino + fname
+    
+    tglobal = time.time()-tglobal
+    print "Total download time: " + str(tglobal) + " seconds."
+    
+    return local
 
-        input=destino+mfilelist[0]
-        int=reader(input)
-        final={}
-        for x in int:
-            final[x]=[]
+def checkindex(data,destino,index):
+    update=0
+    if index == "l":
+        update = 1
+        try:
+            indexator = open(destino+data+"/indexator.txt","r")
+            index = long(indexator.read())
+            indexator.close()
+        except IOError:
+            print "The indexator does not exist. Starting, therefore, from file index 0."
+            index = 0
+    return index, update
 
-        for x in mfilelist:
-            input=destino+x
-            int=reader(input)
-            if int==0:
-                continue
-            for y in int:
-                final[y].append(int[y])
+def updatedelete(update,destino,data,index,filelist,tarpath):
+    if update == 1:
+        indexator = open(destino+data+"/indexator.txt","w")
+        index += 1
+        indexator.write(str(index))
+        indexator.close()
         
-        createout(lstar[index]+".csv",final)
+    for x in filelist:
+        x=destino+x
+        os.remove(x)
+    os.remove(tarpath)
 
-        for x in filelist:
-            x=destino+x
-            os.remove(x)
+    
 
+def roda(data,destino,index):
+    troda=time.time()
+    
+    index,update = checkindex(data,destino,index)
 
-roda('2014/02/01','/Users/pedro/CTI/ID/MLab/NDT/',1,3)
+    print "\nInitiating the program for " + data + ", file index " + str(index) + "."
+    tarpath = downloader(data,destino,index)
+    filelist = texpand(tarpath)
+    mfilelist = metalist(filelist)
 
+    if mfilelist == [] :
+        updatedelete(update,destino,data,index,filelist,tarpath)
+        return
+
+    tester = 0
+    intermediate = 0
+    while intermediate == 0:
+        intermediate=reader(destino+mfilelist[tester])
+        tester+=1
+
+    final={}
+    for x in intermediate:
+        final[x]=[]
+
+    for x in mfilelist:
+        input=destino+x
+        intermediate=reader(input)
+        if intermediate==0:
+            continue
+        for y in intermediate:
+            final[y].append(intermediate[y])
+
+    creationpath=destino+"Results/"+data+"/summary_%03i.txt" %index
+    if os.path.exists(destino+"Results/"+data+"/") == False: os.makedirs(destino+"Results/"+data+"/")
+    createout(creationpath,final)
+
+    updatedelete(update,destino,data,index,filelist,tarpath)
+
+    troda=time.time()-troda
+    print "\nThe program took " + str(troda) + " seconds."
+
+while 666 > 1:
+    try: roda('2014/03/01','/Users/pedro/CTI/ID/MLab/NDT/',"l")
+    except IOError:
+        print "\nThere seems to have occurred an IOError. Probably, something went awry with the download. Let us give it another try"
+        continue
+    except ValueError:
+        print "\nThis is an invalid index file. Probably, all the files for this date have been processed. Terminating the programme. This is probably the end, mate, start working on another date!!"
+        break
+    except KeyError:
+        print "A KeyError, you don't say? This should nay have happened. It matters not: let us merely run this shit again."
+        continue

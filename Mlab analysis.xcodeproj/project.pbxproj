@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
+		EB78264F18D1DB1E005C19A0 /* mlab_base_input.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = mlab_base_input.py; sourceTree = "<group>"; };
 		EBA3668418CDE914002C3685 /* mlab_base.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = mlab_base.py; sourceTree = "<group>"; };
 		EBA3668518CDECE3002C3685 /* testes_mlab.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = testes_mlab.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -16,6 +17,7 @@
 			isa = PBXGroup;
 			children = (
 				EBA3668418CDE914002C3685 /* mlab_base.py */,
+				EB78264F18D1DB1E005C19A0 /* mlab_base_input.py */,
 				EBA3668518CDECE3002C3685 /* testes_mlab.py */,
 			);
 			sourceTree = "<group>";
@@ -170,6 +172,7 @@
 				EBA3668318CDE8FE002C3685 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
