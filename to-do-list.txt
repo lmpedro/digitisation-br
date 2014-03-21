@@ -1,0 +1,14 @@
+Files
+geolocate:
+    comment the whole thing
+    make the final function receive arguments
+    create a dictionary recording the number occurrences of each country
+dload:
+    make the final function receive arguments
+    
+General issues
+Start listing what we've got and aim at having
+Better describe the project
+Add a timeline?
+List our detected issues
+Start writing out our general strategy
