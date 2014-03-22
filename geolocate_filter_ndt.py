@@ -156,9 +156,13 @@ def readsum(input):
         tests.append(x.split("|"))
     
     file.close()
+    if tests[0]==['\n']: del tests[0]
+    for x in range(len([tests[0]])):
+        if tests[0][x]=='': del tests[0][x]
     for h in range(len(tests)):
         for i in range(len(tests[h])):
             tests[h][i]=tests[h][i].replace('\n','')
+            
 
     return tests
 
