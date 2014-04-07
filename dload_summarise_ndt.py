@@ -153,8 +153,14 @@ def downloader(data,destino,index):
         raise ValueError, "This is an invalid index file. Probably, all the files for this date have been processed. Terminating the programme."
     
     chamada = 'gsutil cp ' + tarlist[index] + " " + destino
-    subprocess.call(chamada, shell=True)
-    
+    exitcode = 0
+    while exitcode == 0:
+        try:
+            subprocess.call(chamada, shell=True)
+            exitcode = 1
+        except CalledProcessError:
+            print "CalledProcessError, you don't say? Let's give it another try!"
+
     fpath = tarlist[index]
     fname = fpath.split("/")
     fname = str(fname[-1])
