@@ -206,7 +206,7 @@ def setentries():
     
     llim, ulim = getindex()
     
-    finalcsv="/Users/pedro/CTI/ID/MLab/NDT/Results/BR/%s%s%s_test.txt" %(datelist[0], datelist[1], datelist[2])
+    finalcsv="/Users/pedro/CTI/ID/MLab/NDT/Results/BR/%s%s%s_brsum.txt" %(datelist[0], datelist[1], datelist[2])
     
     finalcsv = checkoutput(finalcsv)
     
