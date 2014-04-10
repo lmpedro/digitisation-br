@@ -146,7 +146,13 @@ def downloader(data,destino,index):
     print "\nInitiating download process..."
     
     gspath = 'gs://m-lab/ndt/' + data + '/'
-    tarlist = subprocess.check_output('gsutil ls ' + gspath, shell=True)
+    exitcode = 0
+    while exitcode == 0:
+        try:
+            tarlist = subprocess.check_output('gsutil ls ' + gspath, shell=True)
+            exitcode = 1
+        except CalledProcessError:
+            print "CalledProcessError, you don't say? Let's give it another try!"
     tarlist = tarlist.split('\n')
     print "There are a total of %i files for this date. Working on file %i (index %i)." %(len(tarlist)-1,index+1,index)
     if index >= len(tarlist)-1 :
