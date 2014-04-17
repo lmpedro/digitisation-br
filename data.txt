@@ -1,0 +1,51 @@
+Description of what we've got so far.
+
+Internet usage
+
+    NDT test results
+        Captured via our script
+        Shall be collected for the 50k+ or 100k+ cities
+        Seems to have some problems locating the IPs
+        Still being captured
+    
+Anatel-related
+
+    Number of cell phone antennas per city
+        Includes the date when the first one started operating
+
+    3G coverage per city
+        Number of operators that provide it
+
+    Number of paid tv subscriptions
+
+    Number of EILD wire centrals per city
+    
+    Number of schools served by high-speed connections
+
+RAIS
+    
+    Percentage of IBSS and PROFSSs per city
+    
+Censo
+    
+    Percentage of households with PCs
+    Percentage of households with PCs w/ internet connection
+    % of individuals w/ cellphones
+    % of individuals who've accessed the internet in the last 3 months
+    Percentage of individuals with programming-related diplomas
+    
+Munic
+    Blah
+    
+
+STILL TO BE ACQUIRED
+
+4G coverage
+
+Bakchaul coverage
+
+Backbone coverage
+
+Organic data
+
+Finbra   

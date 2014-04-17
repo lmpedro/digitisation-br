@@ -13,6 +13,7 @@
 		EB78264F18D1DB1E005C19A0 /* dload_summarise_ndt.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = dload_summarise_ndt.py; sourceTree = "<group>"; };
 		EBA3668418CDE914002C3685 /* mlab_base.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = mlab_base.py; sourceTree = "<group>"; };
 		EBA3668518CDECE3002C3685 /* testes_mlab.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = testes_mlab.py; sourceTree = "<group>"; };
+		EBA7F44F19005D5C001002B3 /* data.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = data.txt; sourceTree = "<group>"; };
 		EBC24D8918FF0FC40082E5D1 /* coding.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.python; path = coding.py; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -22,6 +23,7 @@
 			children = (
 				EB21DA8F18DCD63B009DBA4C /* README */,
 				EB21DA8E18DCCF23009DBA4C /* to-do-list.txt */,
+				EBA7F44F19005D5C001002B3 /* data.txt */,
 				EB21DA8D18DB201D009DBA4C /* geolocate_filter_ndt.py */,
 				EBA3668418CDE914002C3685 /* mlab_base.py */,
 				EB78264F18D1DB1E005C19A0 /* dload_summarise_ndt.py */,
