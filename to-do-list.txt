@@ -12,3 +12,5 @@ Better describe the project
 Add a timeline?
 List our detected issues
 Start writing out our general strategy
+List lacking content
+Integrate files not created with Xcode
