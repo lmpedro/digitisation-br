@@ -260,13 +260,19 @@ def roda(data,destino,index):
     
     if mfilelist == [] :
         updatedelete(update,destino,data,index,filelist,tarpath)
+        print "No valid metafiles for this date and server, bloke!"
         return
     
     tester = 0
     intermediate = 0
     while intermediate == 0:
-        intermediate=reader(destino+mfilelist[tester])
-        tester+=1
+        try:
+            intermediate=reader(destino+mfilelist[tester])
+            tester+=1
+        except IndexError:
+            updatedelete(update,destino,data,index,filelist,tarpath)
+            print "No valid metafiles for this date and server, bloke!"
+            return
     
     final={}
     for x in intermediate:
@@ -308,7 +314,7 @@ def dload_summarise():
             continue
         except ValueError:
             print "\nThis is an invalid index file. Probably, all the files for this date have been processed. Terminating the programme. This is probably the end, mate, start working on another date!!"
-            break
+            return
         except KeyError:
             print "A KeyError, you don't say? This should nay have happened. It matters not: let us merely run this shit again."
             continue
