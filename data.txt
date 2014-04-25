@@ -21,6 +21,18 @@ Anatel-related
     Number of EILD wire centrals per city
     
     Number of schools served by high-speed connections
+        This must somehow be integrated with INEP
+        
+INEP
+    K-12 Education Census
+    #It should be noted that these are micro-level data, which might be aggregated via PCs or means
+        
+        Has internet access
+        Has broadband internet access
+        Has computer laboratory
+        Number of computers (per employees + students)
+        Number of DVDs and datashows (per...)
+
 
 RAIS
     
@@ -31,12 +43,15 @@ Censo
     Percentage of households with PCs
     Percentage of households with PCs w/ internet connection
     % of individuals w/ cellphones
-    % of individuals who've accessed the internet in the last 3 months
-    Percentage of individuals with programming-related diplomas
-    
+    % of individuals with programming-related diplomas
+    % of individuals w/ graduate-level programming-related diplomas
+
 Munic
     Blah
     
+PTT
+
+    Number of Autonomous System Numbers (ASNs) per city
 
 STILL TO BE ACQUIRED
 
@@ -45,6 +60,10 @@ STILL TO BE ACQUIRED
 Bakchaul coverage
 
 Backbone coverage
+
+RNP data
+
+PTT
 
 Organic data
 
