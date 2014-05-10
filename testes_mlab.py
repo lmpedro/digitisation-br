@@ -1,43 +1,28 @@
-# -*- coding: utf-8 -*-
 
 '''
-    Descrição do programa!
+Order of the tests:
+    dload, netlimited (congestion), sndlimited
+    upload
+    MinRTT
+    AvgRTT
 '''
+brcond='AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.country_name) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.region) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.city) AND connection_spec.client_geolocation.country_name="Brazil"'
+geovar= 'connection_spec.client_geolocation.region AS region, connection_spec.client_geolocation.city AS city, connection_spec.client_geolocation.latitude AS lat, connection_spec.client_geolocation.longitude AS lon'
 
-import codecs
-import time
-import os
-import zipfile
-import tarfile
-import urllib2
-import subprocess
-import maxminddb as geo
-import socket
-import io
+condition=[
+           'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND web100_log_entry.snap.CongSignals > 0 %s' % brcond,
+           'WHERE IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsReceived) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.Duration) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 0 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsReceived >= 8192 AND web100_log_entry.snap.Duration >= 9000000 AND web100_log_entry.snap.Duration < 3600000000 %s' % brcond,
+           'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 0 %s' % brcond,
+           'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 10 %s' % brcond,
+           ]
 
-jack=os.listdir("/Users/pedro/CTI/ID/MLab/NDT/Results/2014/03/01/")
-print jack
+varselect=[
+           'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local,            (web100_log_entry.snap.HCThruOctetsAcked/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS dspeed, (web100_log_entry.snap.SndLimTimeCwnd/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS netlimited, (web100_log_entry.snap.SndLimTimeCwnd/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS sndlimited %s' % geovar,
+           'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local, web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration AS uspeed %s' %geovar,
+           'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local,            web100_log_entry.snap.MinRTT AS minrtt %s' % geovar,
+           'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local,            (snapshot.web100_log_entry.snap.SumRTT/snapshot.web100_log_entry.snap.CountRTT) AS avgrtt %s' % geovar,
+           ]
 
-def cleanlist(input):
-    ok=0
-    while ok==0:
-        ok=1
-        for x in range(len(input)):
-            y = input[x].split(".")
-            if y[-1]!="txt":
-                del input[x]
-                ok=0
-                break
-    return input
-
-johez =["aaa.txt",
-        "bbb.txt",
-        "a.c",
-        "johen.del",
-        "jorge.txt",
-        "adeline.txt",
-        "Hat.hat",
-        "jo.txt"
-        ]
-
-cleanlist(johez)
+for x, y in zip(varselect, condition):
+    print 'SELECT %s FROM [table] WHERE %s' % (x, y)
+    print '\n\n\n\n\n'
