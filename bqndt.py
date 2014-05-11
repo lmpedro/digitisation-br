@@ -19,20 +19,22 @@ def DefQlist(onedate=1, onequery=1):
 
     brcond='AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.country_name) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.region) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.city) AND connection_spec.client_geolocation.country_name="Brazil"'
     geovar= ', connection_spec.client_geolocation.region AS region, connection_spec.client_geolocation.city AS city, connection_spec.client_geolocation.latitude AS lat, connection_spec.client_geolocation.longitude AS lon'
-    basicvars= ', test_id AS test_id, STRFTIME_UTC_USEC(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000), "%Y-%m-%d") AS day'
+    basicvars= ', web100_log_entry.connection_spec.remote_ip AS ip_remote, web100_log_entry.connection_spec.local_ip AS ip_local, test_id AS test_id, STRFTIME_UTC_USEC(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000), "%Y-%m-%d") AS day'
 
     condition=[
                'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND web100_log_entry.snap.CongSignals > 0 %s' % brcond,
                'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsReceived) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.Duration) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 0 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsReceived >= 8192 AND web100_log_entry.snap.Duration >= 9000000 AND web100_log_entry.snap.Duration < 3600000000 %s' % brcond,
                'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 0 %s' % brcond,
-               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 10 %s' % brcond,
+               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 10 %s' % brcond,
+               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SegsRetrans) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsOut) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DupAcksIn) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsIn) %s' % brcond,
                ]
 
     varselect=[
-               'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local,            (web100_log_entry.snap.HCThruOctetsAcked/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS dspeed, (web100_log_entry.snap.SndLimTimeCwnd/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS netlimited, (web100_log_entry.snap.SndLimTimeCwnd/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS sndlimited %s %s ' % (geovar, basicvars),
-               'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local, web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration AS uspeed %s' %geovar,
-               'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local,            web100_log_entry.snap.MinRTT AS minrtt %s %s ' % (geovar, basicvars),
-               'web100_log_entry.connection_spec.remote_ip AS ip_remote,            web100_log_entry.connection_spec.local_ip AS ip_local,            (web100_log_entry.snap.SumRTT/web100_log_entry.snap.CountRTT) AS avgrtt %s %s ' % (geovar, basicvars),
+               '(web100_log_entry.snap.HCThruOctetsAcked/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS dspeed, (web100_log_entry.snap.SndLimTimeCwnd/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS netlimited, (web100_log_entry.snap.SndLimTimeRwin/            (web100_log_entry.snap.SndLimTimeRwin +             web100_log_entry.snap.SndLimTimeCwnd +             web100_log_entry.snap.SndLimTimeSnd)) AS rcvlimited %s %s ' % (geovar, basicvars),
+               'web100_log_entry.snap.HCThruOctetsReceived/web100_log_entry.snap.Duration AS uspeed %s %s ' % (geovar, basicvars),
+               'web100_log_entry.snap.MinRTT AS minrtt %s %s ' % (geovar, basicvars),
+               '(web100_log_entry.snap.SumRTT/web100_log_entry.snap.CountRTT) AS avgrtt %s %s ' % (geovar, basicvars),
+               'web100_log_entry.snap.SegsRetrans/web100_log_entry.snap.DataSegsOut AS pktretrans, web100_log_entry.snap.DataSegsOut/web100_log_entry.snap.CongSignals AS pktloss, web100_log_entry.snap.DupAcksIn/web100_log_entry.snap.DataSegsIn AS pktooo %s %s ' % (geovar, basicvars),
                ]
 
     if onedate:
@@ -44,7 +46,7 @@ def DefQlist(onedate=1, onequery=1):
         datelist=[]
         for ano in range(2009,2015):
             if ano==2009:
-                for i in range(2,13):
+                for i in range(8,13):
                     datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
             elif ano==2014:
                 for i in range(1,5):
@@ -98,7 +100,7 @@ def printTableData(data, startIndex):
 # Run a synchronous query, save the results to a table, overwriting the
 # existing data, and print the first page of results.
 # Default timeout is to wait until query finishes.
-def runSyncQuery (qdef, projectId, service, datasetId='', timeout=0,verbose=0,giveback=0):
+def runSyncQuery (qdef, service, projectId='448623832260', timeout=0,verbose=0,giveback=0):
   try:
     print 'timeout:%d' % timeout
     
@@ -158,7 +160,7 @@ def runSyncQuery (qdef, projectId, service, datasetId='', timeout=0,verbose=0,gi
 
 
 
-def viewSyncQuery(projectId, jobId, service, datasetId='', timeout=0, verbose=1, giveback=0):
+def viewSyncQuery(jobId, service, projectId='448623832260', timeout=0, verbose=1, giveback=0):
   try:
     print 'timeout:%d' % timeout
     
@@ -214,6 +216,75 @@ def viewSyncQuery(projectId, jobId, service, datasetId='', timeout=0, verbose=1,
 
 
 
+
+def runAsyncQuery (qdef, service, projectId='448623832260', destProjectId='448623832260', destDatasetId='', destTableId='', writeDisposition='WRITE_APPEND', priority='INTERACTIVE'):
+  try:
+    jobCollection = service.jobs()
+    queryString = qdef+';'
+    if destDatasetId!='':
+        jobData = {
+            'configuration': {
+                'query': {
+                    'query': qdef,
+                    'destinationTable': {
+                        'projectId': destProjectId,
+                        'datasetId': destDatasetId,
+                        'tableId': destTableId
+                    },
+                    'writeDisposition':writeDisposition,
+                    'priority':priority
+                }
+            }
+        }
+    else:
+        jobData = {
+          'configuration': {
+            'query': {
+                'query': qdef,
+            }
+          }
+        }
+
+    insertResponse = jobCollection.insert(projectId=projectId,
+                                         body=jobData).execute()
+
+    # Get query results. Results will be available for about 24 hours.
+    currentRow = 0
+    queryReply = jobCollection.getQueryResults(
+                      projectId=projectId,
+                      jobId=insertResponse['jobReference']['jobId'],
+                      startIndex=currentRow).execute()
+    print queryReply
+
+    while(('rows' in queryReply) and currentRow < queryReply['totalRows']):
+      printTableData(queryReply, currentRow)
+      currentRow += len(queryReply['rows'])
+      queryReply = jobCollection.getQueryResults(
+                        projectId=projectId,
+                        jobId=queryReply['jobReference']['jobId'],
+                        startIndex=currentRow).execute()
+
+  except HttpError as err:
+    print 'Error in runAsyncTempTable:', pprint.pprint(err.resp)
+
+  except Exception as err:
+    print 'Undefined error' % err
+
+
+
+
+
+def deleteTable(service, datasetId, tableId, projectId='448623832260'):
+    service.tables().delete(projectId=projectId,
+                            datasetId=datasetId,
+                            tableId=tableId).execute()
+
+
+
+
+
+
+
 def outputter(outpath, input):
     output = io.open(outpath,"w")
     
@@ -245,40 +316,26 @@ def outputter(outpath, input):
     output.close()
 
 
-# Enter your Google Developer Project number
-PROJECT_NUMBER = '448623832260'
+if __name__ == '__main__':
 
-FLOW = flow_from_clientsecrets('client_secrets.json',
-                               scope='https://www.googleapis.com/auth/bigquery')
+    # Enter your Google Developer Project number
+    PROJECT_NUMBER = '448623832260'
 
-service = servicer(PROJECT_NUMBER)
+    FLOW = flow_from_clientsecrets('client_secrets.json',
+                                   scope='https://www.googleapis.com/auth/bigquery')
 
-
-#jobId='job_ouivGD0WVYFGCSUFRotpBILxoNc'
-#jobReference=runSyncQuery(qdef=qdef[1],projectId=PROJECT_NUMBER, service=service,timeout=5000)
-
-#data=viewSyncQuery(projectId=jobReference['projectId'], jobId=jobReference['jobId'], service=service, giveback=1)
-#data=viewSyncQuery(projectId=PROJECT_NUMBER, jobId=jobId, service=service, giveback=1)
-
-#outputter('/Users/pedro/desktop/aaa.txt',data)
-
-#a,b=runSyncQuery(qdef=qdef[-1],projectId=PROJECT_NUMBER, service=service,timeout=5000, verbose=1, giveback=2)
+    service = servicer(PROJECT_NUMBER)
 
 
+    #jobId='job_ouivGD0WVYFGCSUFRotpBILxoNc'
+    #jobReference=runSyncQuery(qdef=qdef[1],projectId=PROJECT_NUMBER, service=service,timeout=5000)
 
-qlist=DefQlist()
+    #data=viewSyncQuery(projectId=jobReference['projectId'], jobId=jobReference['jobId'], service=service, giveback=1)
+    #data=viewSyncQuery(projectId=PROJECT_NUMBER, jobId=jobId, service=service, giveback=1)
 
-jobdeflist=[]
-for definition in qlist:
-    jobdeflist.append(runSyncQuery(qdef=definition,projectId=PROJECT_NUMBER, service=service,timeout=5000, verbose=0, giveback=1))
+    #outputter('/Users/pedro/desktop/aaa.txt',data)
 
-file=open("/users/pedro/desktop/testdel.txt","w")
-i=1
-for jack in jobdeflist:
-    if i>1: file.write('\n')
-    file.write(jack['jobId'])
-    i+=1
-file.close
+    #a,b=runSyncQuery(qdef=qdef[-1],projectId=PROJECT_NUMBER, service=service,timeout=5000, verbose=1, giveback=2)
 
 
 
@@ -288,20 +345,60 @@ file.close
 
 
 
+    qlist=DefQlist(onequery=0, onedate=0)
+
+    '''
+    jobdeflist=[]
+    for definition in qlist:
+        jobdeflist.append(runSyncQuery(qdef=definition,projectId=PROJECT_NUMBER, service=service,timeout=5000, verbose=0, giveback=1))
+
+    file=open("/users/pedro/desktop/testdel.txt","w")
+    i=1
+    for jack in jobdeflist:
+        if i>1: file.write('\n')
+        file.write(jack['jobId'])
+        i+=1
+    file.close
 
 
-file=open("/users/pedro/desktop/testdel.txt","r")
-jobdeflist=[]
-for x in file:
-    x=x.replace("\n","")
-    jobdeflist.append(x)
-file.close
-
-basepath="/Users/pedro/CTI/ID/MLab/NDT/BigQuery/Results/Tests/"
-
-for definition in jobdeflist:
-    result=viewSyncQuery(projectId=PROJECT_NUMBER, jobId=definition, service=service, giveback=1)
-    path=basepath+definition+'.txt'
-    outputter(path,result)
 
 
+
+
+
+
+
+
+
+    file=open("/users/pedro/desktop/testdel.txt","r")
+    jobdeflist=[]
+    for x in file:
+        x=x.replace("\n","")
+        jobdeflist.append(x)
+    file.close
+
+    basepath="/Users/pedro/CTI/ID/MLab/NDT/BigQuery/Results/Tests/"
+
+    for definition in jobdeflist:
+        result=viewSyncQuery(projectId=PROJECT_NUMBER, jobId=definition, service=service, giveback=1)
+        path=basepath+definition+'.txt'
+        outputter(path,result)
+    '''
+
+    destDatasetId='ndtbr'
+    destTableId='combndt'
+
+    #deleteTable(projectId='448623832260', service=service, datasetId=destDatasetId, tableId=destTableId)
+    for i in range(90):
+        try:
+            deleteTable(projectId='448623832260', service=service, datasetId=destDatasetId, tableId='test'+str(i))
+
+        except:
+            print "no table to be deleted!"
+
+    i=0
+    print len(qlist)
+    for qdef in qlist:
+        i+=1
+        print i
+        runAsyncQuery(qdef=qdef, service=service, destDatasetId=destDatasetId, destTableId='test'+str(i))
