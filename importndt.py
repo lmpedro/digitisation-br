@@ -4,6 +4,7 @@ import httplib2
 import pprint
 import sys
 import io
+import time
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -18,7 +19,8 @@ from bqndt import servicer
 from bqndt import runAsyncQuery
 
 brcond='AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.country_name) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.region) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.city) AND connection_spec.client_geolocation.country_name="Brazil"'
-condition = 'IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) %s' % brcond
+lastentrycond = 'AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True'
+condition = 'IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) %s %s;' % (brcond, lastentrycond)
 
 datelist=[]
 for ano in range(2009,2015):
@@ -67,3 +69,4 @@ for qdef in qlist:
     i+=1
     print i
     runAsyncQuery(qdef=qdef, service=service, destDatasetId=destDatasetId, destTableId=destTableId, priority='BATCH')
+    time.sleep(120)
