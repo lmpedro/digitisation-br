@@ -23,15 +23,15 @@ lastentrycond = 'AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND w
 condition = 'IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) %s %s;' % (brcond, lastentrycond)
 
 datelist=[]
-for ano in range(2009,2015):
+for ano in reversed(range(2009,2015)):
     if ano==2009:
-        for i in range(8,13):
+        for i in reversed(range(8,13)):
             datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
     elif ano==2014:
-        for i in range(1,5):
+        for i in reversed(range(1,5)):
             datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
     else:
-        for i in range(1,13):
+        for i in reversed(range(1,13)):
             datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
 
 qlist=[]
@@ -39,8 +39,8 @@ for date in datelist:
     qlist.append('SELECT * FROM [%s] WHERE %s' %(date, condition))
 
 
-destDatasetId='ndtbr'
-destTableId='combndt'
+destDatasetId='digitisationBR'
+destTableId='ndtbr'
 PROJECT_NUMBER = '448623832260'
 
 
@@ -57,7 +57,6 @@ service = servicer(PROJECT_NUMBER)
 
 
 
-#deleteTable(projectId='448623832260', service=service, datasetId=destDatasetId, tableId=destTableId)
 try: deleteTable(projectId='448623832260', service=service, datasetId=destDatasetId, tableId=destTableId)
 except:
     print "Iargh!"
