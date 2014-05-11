@@ -42,11 +42,11 @@ def DefQlist(onequery=1):
                ]
 
     qlist=[]
-            qlist.append('SELECT %s FROM [ndtexplorer:ndtbr.] WHERE %s' % (varselect[0], date, condition[0]))
+    if onequery:
+        qlist.append('SELECT %s FROM [ndtexplorer:ndtbr.combndt] WHERE %s' % (varselect[0], condition[0]))
     else:
         for x, y in zip(varselect, condition):
-            for date in datelist:
-                qlist.append('SELECT %s FROM [%s] WHERE %s' % (x, date, y))
+            qlist.append('SELECT %s FROM [ndtexplorer:ndtbr.combndt] WHERE %s' % (x, y))
 
     return qlist
 
@@ -215,7 +215,7 @@ def runAsyncQuery (qdef, service, projectId='448623832260', destProjectId='44862
                         'datasetId': destDatasetId,
                         'tableId': destTableId
                     },
-                    'writeDisposition':writeDisposition,
+                    'writeDisposition': writeDisposition,
                     'priority': priority,
                 }
             }
