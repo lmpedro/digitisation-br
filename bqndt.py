@@ -15,18 +15,22 @@ from oauth2client.file import Storage
 from oauth2client.tools import run
 
 
-def DefQlist(onedate=1, onequery=1):
+def DefQlist(onequery=1):
 
-    brcond='AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.country_name) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.region) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.city) AND connection_spec.client_geolocation.country_name="Brazil"'
-    geovar= ', connection_spec.client_geolocation.region AS region, connection_spec.client_geolocation.city AS city, connection_spec.client_geolocation.latitude AS lat, connection_spec.client_geolocation.longitude AS lon'
-    basicvars= ', web100_log_entry.connection_spec.remote_ip AS ip_remote, web100_log_entry.connection_spec.local_ip AS ip_local, test_id AS test_id, STRFTIME_UTC_USEC(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000), "%Y-%m-%d") AS day'
+    geovar= 'connection_spec.client_geolocation.region AS region, connection_spec.client_geolocation.city AS city, connection_spec.client_geolocation.latitude AS lat, connection_spec.client_geolocation.longitude AS lon'
+    basicvars= 'web100_log_entry.connection_spec.remote_ip AS ip_remote, web100_log_entry.connection_spec.local_ip AS ip_local, test_id AS test_id, STRFTIME_UTC_USEC(UTC_USEC_TO_DAY(web100_log_entry.log_time * 1000000), "%Y-%m-%d") AS day'
+    lastentrycond = 'AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True'
+    dtimecond='AND IS_EXPLICITLY_DEFINED)web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000'
+    ipcond='IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)'
+    udirection='AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 0'
+    ddirection='AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1'
 
     condition=[
-               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND web100_log_entry.snap.CongSignals > 0 %s' % brcond,
-               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsReceived) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.Duration) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 0 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsReceived >= 8192 AND web100_log_entry.snap.Duration >= 9000000 AND web100_log_entry.snap.Duration < 3600000000 %s' % brcond,
-               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 0 %s' % brcond,
-               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 10 %s' % brcond,
-               'IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry.connection_spec.local_ip)AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SndLimTimeSnd) AND IS_EXPLICITLY_DEFINED(project) AND project = 0 AND IS_EXPLICITLY_DEFINED(connection_spec.data_direction) AND connection_spec.data_direction = 1 AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True AND web100_log_entry.snap.HCThruOctetsAcked >= 8192 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) >= 9000000 AND (web100_log_entry.snap.SndLimTimeRwin + web100_log_entry.snap.SndLimTimeCwnd + web100_log_entry.snap.SndLimTimeSnd) < 3600000000 AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SegsRetrans) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsOut) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DupAcksIn) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsIn) %s' % brcond,
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND web100_log_entry.snap.CongSignals > 0 %s %s %s' % (ipcond, lastentrycond, dtimecond, ddirection),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.HCThruOctetsReceived) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.Duration) AND web100_log_entry.snap.HCThruOctetsReceived >= 8192 AND web100_log_entry.snap.Duration >= 9000000 AND web100_log_entry.snap.Duration < 3600000000 %s %s' % (ipcond, lastentrycond, udirection),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.MinRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 0 %s %s %s' % (ipcond, lastentrycond, dtimecond, ddirection),
+               '%s IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CountRTT) AND web100_log_entry.snap.CountRTT > 10 %s %s %s' % (ipcond, lastentrycond, dtimecond, ddirection),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.SegsRetrans) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsOut) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.CongSignals) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DupAcksIn) AND IS_EXPLICITLY_DEFINED(web100_log_entry.snap.DataSegsIn) %s %s %s' % (ipcond, lastentrycond, dtimecond, ddirection),
                ]
 
     varselect=[
@@ -37,28 +41,8 @@ def DefQlist(onedate=1, onequery=1):
                'web100_log_entry.snap.SegsRetrans/web100_log_entry.snap.DataSegsOut AS pktretrans, web100_log_entry.snap.DataSegsOut/web100_log_entry.snap.CongSignals AS pktloss, web100_log_entry.snap.DupAcksIn/web100_log_entry.snap.DataSegsIn AS pktooo %s %s ' % (geovar, basicvars),
                ]
 
-    if onedate:
-        datelist=[]
-        ano=2014
-        i=4
-        datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
-    else:
-        datelist=[]
-        for ano in range(2009,2015):
-            if ano==2009:
-                for i in range(8,13):
-                    datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
-            elif ano==2014:
-                for i in range(1,5):
-                    datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
-            else:
-                for i in range(1,13):
-                    datelist.append('measurement-lab:m_lab.%i_%02i' %(ano, i))
-
     qlist=[]
-    if onequery:
-        for date in datelist:
-            qlist.append('SELECT %s FROM [%s] WHERE %s' % (varselect[0], date, condition[0]))
+            qlist.append('SELECT %s FROM [ndtexplorer:ndtbr.] WHERE %s' % (varselect[0], date, condition[0]))
     else:
         for x, y in zip(varselect, condition):
             for date in datelist:
@@ -232,7 +216,7 @@ def runAsyncQuery (qdef, service, projectId='448623832260', destProjectId='44862
                         'tableId': destTableId
                     },
                     'writeDisposition':writeDisposition,
-                    'priority':priority
+                    'priority': priority,
                 }
             }
         }
@@ -241,6 +225,7 @@ def runAsyncQuery (qdef, service, projectId='448623832260', destProjectId='44862
           'configuration': {
             'query': {
                 'query': qdef,
+                'priority': priority,
             }
           }
         }
@@ -248,21 +233,7 @@ def runAsyncQuery (qdef, service, projectId='448623832260', destProjectId='44862
     insertResponse = jobCollection.insert(projectId=projectId,
                                          body=jobData).execute()
 
-    # Get query results. Results will be available for about 24 hours.
-    currentRow = 0
-    queryReply = jobCollection.getQueryResults(
-                      projectId=projectId,
-                      jobId=insertResponse['jobReference']['jobId'],
-                      startIndex=currentRow).execute()
-    print queryReply
-
-    while(('rows' in queryReply) and currentRow < queryReply['totalRows']):
-      printTableData(queryReply, currentRow)
-      currentRow += len(queryReply['rows'])
-      queryReply = jobCollection.getQueryResults(
-                        projectId=projectId,
-                        jobId=queryReply['jobReference']['jobId'],
-                        startIndex=currentRow).execute()
+    return insertResponse
 
   except HttpError as err:
     print 'Error in runAsyncTempTable:', pprint.pprint(err.resp)
