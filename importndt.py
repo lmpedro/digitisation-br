@@ -17,6 +17,8 @@ from oauth2client.tools import run
 
 from bqndt import servicer
 from bqndt import runAsyncQuery
+from bqndt import deleteTable
+from bqndt import getTable
 
 brcond='AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.country_name) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.region) AND IS_EXPLICITLY_DEFINED(connection_spec.client_geolocation.city) AND connection_spec.client_geolocation.country_name="Brazil"'
 lastentrycond = 'AND IS_EXPLICITLY_DEFINED(web100_log_entry.is_last_entry) AND web100_log_entry.is_last_entry = True'
@@ -40,7 +42,7 @@ for date in datelist:
 
 
 destDatasetId='digitisationBR'
-destTableId='ndtbr'
+destTableId='ndt_br'
 PROJECT_NUMBER = '448623832260'
 
 
@@ -54,18 +56,32 @@ service = servicer(PROJECT_NUMBER)
 
 
 
-
-
-
+#Deletes the final table, if it exists
 try: deleteTable(projectId='448623832260', service=service, datasetId=destDatasetId, tableId=destTableId)
 except:
     print "Iargh!"
 
+#Creates the intermediary tables
 i=0
 print 'Qlist length is: %i' % (len(qlist))
-
-for qdef in qlist:
+for qdef, date in zip(qlist, datelist):
     i+=1
     print i
-    runAsyncQuery(qdef=qdef, service=service, destDatasetId=destDatasetId, destTableId=destTableId, priority='BATCH')
-    time.sleep(120)
+    destTableId='ndtbr'+date[-7:][:4]+date[-2:]
+    check=getTable(projectId=PROJECT_NUMBER,service=service,datasetId=destDatasetId,tableId=destTableId)
+    if check == None:
+        runAsyncQuery(qdef=qdef, service=service, destDatasetId=destDatasetId, destTableId=destTableId, priority='BATCH', writeDisposition='WRITE_EMPTY')
+        time.sleep(120)
+
+#Creates the final table
+qdef="SELECT * FROM (TABLE_QUERY(ndtexplorer:digitisationBR,'table_id CONTAINS \"ndtbr\"'))"
+destTableId='ndt_br'
+runAsyncQuery(qdef=qdef, service=service, destDatasetId=destDatasetId, destTableId=destTableId, priority='BATCH', writeDisposition='WRITE_EMPTY')
+
+#Deletes the intermediary tables created
+for qdef, date in zip(qlist, datelist):
+    i+=1
+    print i
+    destTableId='ndtbr'+date[-7:][:4]+date[-2:]
+    deleteTAble(service=service, projectId=PROJECT_NUMBER DatasetId=destDatasetId, TableId=destTableId)
+    time.sleep(10)
