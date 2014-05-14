@@ -16,22 +16,26 @@ from oauth2client.tools import run
 
 
 
-def DefQlist(onequery=1):
+def DefQlist(onequery=1, early=1):
 
     geovar= 'connection_spec_client_geolocation_region AS region, connection_spec_client_geolocation_city AS city, connection_spec_client_geolocation_latitude AS lat, connection_spec_client_geolocation_longitude AS lon'
-    basicvars= 'web100_log_entry_connection_spec_remote_ip AS ip_remote, web100_log_entry_connection_spec_local_ip AS ip_local, test_id AS test_id, STRFTIME_UTC_USEC(UTC_USEC_TO_DAY(web100_log_entry_log_time * 1000000), "%Y-%m-%d") AS day, connection_spec_client_browser AS browser'
+    basicvars= 'web100_log_entry_connection_spec_remote_ip AS ip_remote, web100_log_entry_connection_spec_local_ip AS ip_local, test_id AS test_id, STRFTIME_UTC_USEC(UTC_USEC_TO_DAY(web100_log_entry_log_time * 1000000), "%Y%m%d") AS day, connection_spec_client_browser AS browser'
     lastentrycond = 'IS_EXPLICITLY_DEFINED(web100_log_entry_is_last_entry) AND web100_log_entry_is_last_entry = True'
     dtimecond='IS_EXPLICITLY_DEFINED(web100_log_entry_snap_HCThruOctetsAcked) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SndLimTimeRwin) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SndLimTimeCwnd) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SndLimTimeSnd) AND web100_log_entry_snap_HCThruOctetsAcked >= 8192 AND (web100_log_entry_snap_SndLimTimeRwin + web100_log_entry_snap_SndLimTimeCwnd + web100_log_entry_snap_SndLimTimeSnd) >= 9000000 AND (web100_log_entry_snap_SndLimTimeRwin + web100_log_entry_snap_SndLimTimeCwnd + web100_log_entry_snap_SndLimTimeSnd) < 3600000000'
     ipcond='IS_EXPLICITLY_DEFINED(web100_log_entry_connection_spec_remote_ip) AND IS_EXPLICITLY_DEFINED(web100_log_entry_connection_spec_local_ip)'
     udirection='IS_EXPLICITLY_DEFINED(connection_spec_data_direction) AND connection_spec_data_direction = 0'
     ddirection='IS_EXPLICITLY_DEFINED(connection_spec_data_direction) AND connection_spec_data_direction = 1'
+    if early:
+        earlycondition='web100_log_entry_log_time>1325376000'
+    else:
+        earlycondition='web100_log_entry_log_time>1'
 
     condition=[
-               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CongSignals) AND web100_log_entry_snap_CongSignals > 0 AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection),
-               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_HCThruOctetsReceived) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_Duration) AND web100_log_entry_snap_HCThruOctetsReceived >= 8192 AND web100_log_entry_snap_Duration >= 9000000 AND web100_log_entry_snap_Duration < 3600000000 AND %s AND %s' % (ipcond, lastentrycond, udirection),
-               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_MinRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CountRTT) AND web100_log_entry_snap_CountRTT > 0 AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection),
-               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CountRTT) AND web100_log_entry_snap_CountRTT > 10 AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection),
-               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SegsRetrans) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_DataSegsOut) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CongSignals) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_DupAcksIn) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_DataSegsIn) AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CongSignals) AND web100_log_entry_snap_CongSignals > 0 AND %s AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection, earlycondition),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_HCThruOctetsReceived) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_Duration) AND web100_log_entry_snap_HCThruOctetsReceived >= 8192 AND web100_log_entry_snap_Duration >= 9000000 AND web100_log_entry_snap_Duration < 3600000000 AND %s AND %s AND %s' % (ipcond, lastentrycond, udirection, earlycondition),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_MinRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CountRTT) AND web100_log_entry_snap_CountRTT > 0 AND %s AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection, earlycondition),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SumRTT) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CountRTT) AND web100_log_entry_snap_CountRTT > 10 AND %s AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection, earlycondition),
+               '%s AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_SegsRetrans) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_DataSegsOut) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_CongSignals) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_DupAcksIn) AND IS_EXPLICITLY_DEFINED(web100_log_entry_snap_DataSegsIn) AND %s AND %s AND %s AND %s' % (ipcond, lastentrycond, dtimecond, ddirection, earlycondition),
                ]
 
     varselect=[
