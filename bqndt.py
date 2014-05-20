@@ -4,6 +4,7 @@ import httplib2
 import pprint
 import sys
 import io
+import subprocess
 
 from apiclient.discovery import build
 from apiclient.errors import HttpError
@@ -43,7 +44,7 @@ def DefQlist(onequery=1, early=1):
                'web100_log_entry_snap_HCThruOctetsReceived/web100_log_entry_snap_Duration AS uspeed, %s, %s ' % (geovar, basicvars),
                'web100_log_entry_snap_MinRTT AS minrtt, %s, %s ' % (geovar, basicvars),
                '(web100_log_entry_snap_SumRTT/web100_log_entry_snap_CountRTT) AS avgrtt, %s, %s ' % (geovar, basicvars),
-               'web100_log_entry_snap_SegsRetrans/web100_log_entry_snap_DataSegsOut AS pktretrans, web100_log_entry_snap_DataSegsOut/web100_log_entry_snap_CongSignals AS pktloss, web100_log_entry_snap_DupAcksIn/web100_log_entry_snap_DataSegsIn AS pktooo, %s, %s ' % (geovar, basicvars),
+               'web100_log_entry_snap_SegsRetrans/web100_log_entry_snap_DataSegsOut AS pktretrans, web100_log_entry_snap_CongSignals/web100_log_entry_snap_DataSegsOut AS pktloss, web100_log_entry_snap_DupAcksIn/web100_log_entry_snap_DataSegsIn AS pktooo, %s, %s ' % (geovar, basicvars),
                ]
 
     qlist=[]
@@ -304,40 +305,141 @@ def outputter(outpath, input):
     output.close()
 
 
-if __name__ == '__main__':
-
-    # Enter your Google Developer Project number
-    PROJECT_NUMBER = '448623832260'
-
-    FLOW = flow_from_clientsecrets('client_secrets.json',
-                                   scope='https://www.googleapis.com/auth/bigquery')
-
-    service = servicer(PROJECT_NUMBER)
-
-
-    #jobId='job_ouivGD0WVYFGCSUFRotpBILxoNc'
-    #jobReference=runSyncQuery(qdef=qdef[1],projectId=PROJECT_NUMBER, service=service,timeout=5000)
-
-    #data=viewSyncQuery(projectId=jobReference['projectId'], jobId=jobReference['jobId'], service=service, giveback=1)
-    #data=viewSyncQuery(projectId=PROJECT_NUMBER, jobId=jobId, service=service, giveback=1)
-
-    #outputter('/Users/pedro/desktop/aaa.txt',data)
-
-    #a,b=runSyncQuery(qdef=qdef[-1],projectId=PROJECT_NUMBER, service=service,timeout=5000, verbose=1, giveback=2)
 
 
 
 
 
+def exportTable(service, projectId, datasetId, tableId, destFile, bucket='ndttostata'):
+
+  url = "https://www.googleapis.com/bigquery/v2/projects/" + projectId + "/jobs"
+
+  jobCollection = service.jobs()
+  jobData = {
+    'projectId': projectId,
+    'configuration': {
+      'extract': {
+        'sourceTable': {
+           'projectId': projectId,
+           'datasetId': datasetId,
+           'tableId': tableId
+         },
+        'destinationUris': ['gs://%s/%s' %(bucket, destFile)],
+       }
+     }
+   }
+  insertJob = jobCollection.insert(projectId=projectId, body=jobData).execute()
+  import time
+  while True:
+    status =jobCollection.get(projectId=projectId, jobId=insertJob['jobReference']['jobId']).execute()
+    print status
+    if 'DONE' == status['status']['state']:
+      print "Done exporting!"
+      return
+    print 'Waiting for export to complete..'
+    time.sleep(10)
 
 
 
 
-    qlist=DefQlist(onequery=0)
+
+def schemaCreator(input):
+    filename=input.split('.')[-2]
+    subline='iconv -f macroman -t utf-8 \"%s\"' % (input)
+    converted=subprocess.check_output(subline,shell=True).split('\n')
+
+    helpingHand={}
+    i=0
+    for x in converted:
+        i+=1
+        x=x.split('|')
+        x[-1]=x[-1].replace('\n','')
+        helpingHand[i]=x
+
+    fields=[]
+    for x,y,z in zip(helpingHand[1],helpingHand[2],helpingHand[3]):
+        oneField={}
+        oneField['name']=x
+        oneField['description']=y
+        oneField['type']=z
+        fields.append(oneField)
+    return fields
+
+
+
+
+
+
+
+def loadTable(service, projectId, datasetId, targetTableId, sourceCSV, fields):
+  try:
+    jobCollection = service.jobs()
+    jobData = {
+      'projectId': projectId,
+      'configuration': {
+          'load': {
+            'fieldDelimiter': '|',
+            'sourceUris': [sourceCSV],
+            'schema': {
+              'fields': fields
+            },
+            'destinationTable': {
+              'projectId': projectId,
+              'datasetId': datasetId,
+              'tableId': targetTableId
+            },
+            'skipLeadingRows': 1,
+            'sourceFormat':'CSV',
+          }
+        }
+      }
+
+    insertResponse = jobCollection.insert(projectId=projectId,
+                                         body=jobData).execute()
+
+    # Ping for status until it is done, with a short pause between calls.
+    import time
+    while True:
+      job = jobCollection.get(projectId=projectId,
+                                 jobId=insertResponse['jobReference']['jobId']).execute()
+      if 'DONE' == job['status']['state']:
+          print 'Done Loading!'
+          return
+
+      print 'Waiting for loading to complete...'
+      time.sleep(10)
+
+    if 'errorResult' in job['status']:
+      print 'Error loading table: ', pprint.pprint(job)
+      return
+
+  except HttpError as err:
+    print 'Error in loadTable: ', pprint.pprint(err.resp)
+
+
+
+
+
+
+
+
+def mainQueriesRun(service, projectId):
+    ident=['dspeed',
+           'uspeed',
+           'avgrtt',
+           'minrtt',
+           'pkts',
+           ]
+    destDatasetId='digitisationBR'
+
+
+
+    qlist=DefQlist(onequery=0, early=False)
 
     jobdeflist=[]
-    for definition in qlist:
-        jobdeflist.append(runSyncQuery(qdef=definition,projectId=PROJECT_NUMBER, service=service,timeout=5000, verbose=0, giveback=1))
+    for definition,destTableId in zip(qlist,ident):
+        jobdeflist.append(runSyncQuery(qdef=definition,projectId=projectId, service=service,timeout=5000, verbose=0, giveback=1))
+        #runAsyncQuery(qdef=definition,projectId=projectId, service=service,destProjectId=projectId,destDatasetId=destDatasetId, destTableId=destTableId,writeDisposition='WRITE_TRUNCATE',priority='BATCH',allowLargeResults=True)
 
     file=open("/users/pedro/desktop/testdel.txt","w")
     i=1
@@ -356,7 +458,7 @@ if __name__ == '__main__':
 
 
 
-
+def mainQueriesReadLocal(service, projectId):
     file=open("/users/pedro/desktop/testdel.txt","r")
     jobdeflist=[]
     for x in file:
@@ -367,8 +469,55 @@ if __name__ == '__main__':
     basepath="/Users/pedro/CTI/ID/MLab/NDT/BigQuery/Results/Tests/"
 
     for definition in jobdeflist:
-        result=viewSyncQuery(projectId=PROJECT_NUMBER, jobId=definition, service=service, giveback=1, verbose=0)
+        result=viewSyncQuery(projectId=projectId, jobId=definition, service=service, giveback=1, verbose=0)
         path=basepath+definition+'.txt'
         outputter(path,result)
     
+
+
+
+
+
+def mainExtracts(service, projectId):
+
+    ident=['dspeed',
+           'uspeed',
+           'avgrtt',
+           'minrtt',
+           'pkts',
+           ]
+    datasetId='digitisationBR'
+    
+    for tableId in ident:
+        exportTable(service=service, projectId=projectId, datasetId=datasetId, tableId=tableId, destFile=tableId+'.csv')
+
+
+
+
+
+
+if __name__ == '__main__':
+
+    # Enter your Google Developer Project number
+    projectId = '448623832260'
+    ourdataset='digitisationBR'
+    object='ID_unified'
+    bucket='statatodigi'
+    uri='gs://%s/%s_gs.csv' % (bucket, object)
+    inputInfo='/Users/pedro/CTI/ID/Statas/%s_info.csv' % object
+
+    FLOW = flow_from_clientsecrets('client_secrets.json',
+                                   scope='https://www.googleapis.com/auth/bigquery')
+
+    service = servicer(projectId)
+
+    #mainQueriesRun(service=service, projectId=projectId)
+
+    #mainQueriesRun(service=service, projectId=projectId)
+
+    #mainExtracts(service=service, projectId=projectId)
+    
+    fields=schemaCreator(inputInfo)
+    
+    loadTable(service=service, projectId=projectId, datasetId=ourdataset, targetTableId=object, sourceCSV=uri, fields=fields)
 
