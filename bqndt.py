@@ -343,14 +343,15 @@ def exportTable(service, projectId, datasetId, tableId, destFile, bucket='ndttos
 
 
 
-def schemaCreator(input):
-    filename=input.split('.')[-2]
-    subline='iconv -f macroman -t utf-8 \"%s\"' % (input)
-    converted=subprocess.check_output(subline,shell=True).split('\n')
+def schemaCreator(bucket,object):
+    localFile='./___%s_info.csv' % bucket
+    line='gsutil cp gs://%s/%s_info.csv %s' % (bucket, object, localFile)
+    subprocess.call(line, shell=True)
+    file=open(localFile,'r')
 
     helpingHand={}
     i=0
-    for x in converted:
+    for x in file:
         i+=1
         x=x.split('|')
         x[-1]=x[-1].replace('\n','')
@@ -363,6 +364,8 @@ def schemaCreator(input):
         oneField['description']=y
         oneField['type']=z
         fields.append(oneField)
+    file.close()
+    subprocess.call('rm %s' % localFile, shell=True)
     return fields
 
 
@@ -371,13 +374,14 @@ def schemaCreator(input):
 
 
 
-def loadTable(service, projectId, datasetId, targetTableId, sourceCSV, fields):
+def loadTable(service, projectId, datasetId, targetTableId, sourceCSV, fields, createDisposition=''):
   try:
     jobCollection = service.jobs()
     jobData = {
       'projectId': projectId,
       'configuration': {
           'load': {
+            'createDisposition': createDisposition,
             'fieldDelimiter': '|',
             'sourceUris': [sourceCSV],
             'schema': {
@@ -386,7 +390,7 @@ def loadTable(service, projectId, datasetId, targetTableId, sourceCSV, fields):
             'destinationTable': {
               'projectId': projectId,
               'datasetId': datasetId,
-              'tableId': targetTableId
+              'tableId': targetTableId,
             },
             'skipLeadingRows': 1,
             'sourceFormat':'CSV',
@@ -496,15 +500,30 @@ def mainExtracts(service, projectId):
 
 
 
+def mainLoads(service, projectId):
+    ourdataset='digitisationBR'
+    objects=[
+             'EscolasDoPBLE',
+             'INEP_ID',
+             'ID_unified',
+             ]
+    bucket='statatodigi'
+    for x in objects:
+        uri='gs://%s/%s_gs.csv' % (bucket, x)
+        inputInfo='/Users/pedro/CTI/ID/Statas/%s_info.csv' % x
+        fields=schemaCreator(bucket=bucket,object=x)
+        try: deleteTable(service=service, datasetId=ourdataset, tableId=x, projectId=projectId)
+        except HttpError: pass
+        loadTable(service=service, projectId=projectId, datasetId=ourdataset, targetTableId=x, sourceCSV=uri, fields=fields, createDisposition='WRITE_TRUNCATE')
+
+
+
+
+
 if __name__ == '__main__':
 
     # Enter your Google Developer Project number
     projectId = '448623832260'
-    ourdataset='digitisationBR'
-    object='ID_unified'
-    bucket='statatodigi'
-    uri='gs://%s/%s_gs.csv' % (bucket, object)
-    inputInfo='/Users/pedro/CTI/ID/Statas/%s_info.csv' % object
 
     FLOW = flow_from_clientsecrets('client_secrets.json',
                                    scope='https://www.googleapis.com/auth/bigquery')
@@ -517,7 +536,4 @@ if __name__ == '__main__':
 
     #mainExtracts(service=service, projectId=projectId)
     
-    fields=schemaCreator(inputInfo)
-    
-    loadTable(service=service, projectId=projectId, datasetId=ourdataset, targetTableId=object, sourceCSV=uri, fields=fields)
-
+    mainLoads(service=service, projectId=projectId)
